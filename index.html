@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; media-src data: blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="airt-id" content="chore-chart-app">
+<meta name="airt-version" content="1.0">
+<title>Chore chart app</title>
+<style>
+:root{--bg:#fffaf2;--card:#fff;--ink:#2a2540;--soft:#6f6a80;--line:#f0e6d6;--acc:#ff8a3d;--acc2:#fff0e3;--ok:#1f9d6b;--okbg:#e6f7ef}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{padding:14px 16px 2px;display:flex;justify-content:space-between;align-items:flex-end;max-width:560px;margin:0 auto}
+h1{margin:0;font-size:26px;letter-spacing:-.5px}
+h1 span{color:var(--acc)}
+.wk{color:var(--soft);font-size:14px;text-align:right}
+main{padding:4px 12px 30px;max-width:560px;margin:0 auto}
+button{font:inherit;font-weight:700;border:0;border-radius:14px;cursor:pointer;min-height:48px;color:var(--ink)}
+.kids{display:flex;gap:8px;margin:8px 0}
+.kid{flex:1;background:#fff;border:3px solid var(--line);padding:8px 6px;text-align:center;line-height:1.15}
+.kid .nm{display:block;font-size:16px}
+.kid .pt{display:block;font-size:13px;color:var(--soft);font-weight:600}
+.kid.on{border-color:var(--c);background:var(--cb)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--c);margin-right:5px;vertical-align:0}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:6px 0 8px}
+.day{background:#fff;border:2px solid var(--line);padding:4px 0;font-size:13px;min-height:52px;line-height:1.1}
+.day b{display:block;font-size:17px}
+.day.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.day.today:not(.on){border-color:var(--acc)}
+.day.future{opacity:.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;margin:8px 0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.score{display:flex;justify-content:space-between;align-items:baseline}
+.score .big{font-size:34px;font-weight:800;color:var(--c)}
+.score .big small{font-size:16px;color:var(--soft);font-weight:600}
+.goal{font-size:14px;color:var(--soft);margin:2px 0 6px}
+.bar{height:16px;border-radius:9px;background:#f3eee6;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--c);border-radius:9px}
+.last{font-size:13px;color:var(--soft);margin-top:6px}
+.won{display:none;margin-top:8px;background:var(--okbg);color:var(--ok);border-radius:12px;padding:8px 10px;font-weight:700}
+.won.show{display:block}
+h2{font-size:16px;margin:12px 4px 6px;display:flex;justify-content:space-between}
+h2 span{color:var(--soft);font-weight:600;font-size:14px}
+.job{display:flex;align-items:center;gap:12px;width:100%;background:#fff;border:2px solid var(--line);padding:10px 12px;margin:0 0 7px;text-align:left;min-height:56px}
+.job .tk{flex:none;width:30px;height:30px;border-radius:9px;border:3px solid #d9cfc0;display:grid;place-items:center;color:#fff}
+.job .lb{flex:1;font-size:17px}
+.job .ps{flex:none;font-size:14px;background:var(--acc2);color:#b4561a;border-radius:20px;padding:3px 10px}
+.job.done{background:var(--cb);border-color:var(--c)}
+.job.done .tk{background:var(--c);border-color:var(--c)}
+.job.done .lb{text-decoration:line-through;text-decoration-thickness:2px;color:var(--soft)}
+.job:disabled{opacity:.5}
+.empty{color:var(--soft);text-align:center;padding:16px}
+details{margin-top:12px}
+summary{font-weight:700;font-size:17px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;min-height:48px}
+.set{padding:4px 2px}
+.set label{display:block;font-size:14px;color:var(--soft);margin:10px 2px 4px}
+.set input,.set select{width:100%;font:inherit;font-size:17px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.two{display:grid;grid-template-columns:2fr 1fr;gap:8px}
+.ed{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 6px 6px 12px;margin:5px 0}
+.ed span{flex:1}
+.ed button{min-height:40px;padding:0 12px;background:#fdeceb;color:#b3261e;font-size:14px}
+.btn{width:100%;margin-top:8px;padding:0 14px;background:var(--acc);color:#fff}
+.btn.soft{background:var(--acc2);color:#b4561a}
+.note{font-size:13px;color:var(--soft);text-align:center;margin:16px 6px 0}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;transition:transform .3s;z-index:9;max-width:90%;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<header><h1>Chore <span>chart</span></h1><div class="wk" id="wk"></div></header>
+<main>
+  <div class="kids" id="kids"></div>
+  <div class="days" id="days"></div>
+  <div class="card" id="scorecard">
+    <div class="score"><div class="big" id="points">0 <small>points this week</small></div></div>
+    <div class="goal" id="goal"></div>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="won" id="won"></div>
+    <div class="last" id="last"></div>
+  </div>
+  <h2 id="jobshead">Jobs <span></span></h2>
+  <div id="jobs"></div>
+
+  <details id="setup">
+    <summary>Set up this child</summary>
+    <div class="set">
+      <label for="kname">Nickname (no full names needed)</label>
+      <input id="kname" maxlength="16" autocomplete="off">
+      <label for="kage">Age group for starter jobs</label>
+      <select id="kage"><option value="3-5">Ages 3 to 5</option><option value="6-12">Ages 6 to 12</option></select>
+      <button class="btn soft" id="starter">Load starter jobs for this age</button>
+      <div class="two">
+        <div><label for="kreward">Weekly reward</label><input id="kreward" maxlength="40"></div>
+        <div><label for="kgoal">Goal points</label><input id="kgoal" type="number" inputmode="numeric" min="1" max="500"></div>
+      </div>
+      <label>This child's jobs</label>
+      <div id="edjobs"></div>
+      <div class="two">
+        <div><label for="newjob">New job</label><input id="newjob" maxlength="40" placeholder="e.g. Bring in the bins"></div>
+        <div><label for="newpts">Points</label><select id="newpts"><option value="1">1 quick</option><option value="2" selected>2 medium</option><option value="3">3 big</option></select></div>
+      </div>
+      <button class="btn" id="addjob">Add job</button>
+      <button class="btn soft" id="addkid">Add another child</button>
+      <button class="btn soft" id="delkid">Remove this child</button>
+    </div>
+  </details>
+  <p class="note">Pick jobs that suit your child. Help with, and supervise, anything involving heat, knives or cleaning products.<br>Saved on this phone only. No account, no internet.</p>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+"use strict";
+var KEY = "chore-chart-app-data";
+var COLOURS = [["#ff7a2f","#fff1e6"],["#2f8cff","#e8f2ff"],["#1fa874","#e6f7ef"],["#c04fd6","#f7eafb"]];
+var DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+// Starter jobs from Raising Children Network, "Household chores for kids" (age lists).
+// Points are an effort rating (1 quick, 2 medium, 3 big), our own choice, not from the source.
+var STARTERS = {
+  "3-5": [["Pack away toys",1],["Put dirty clothes in the basket",1],["Fill the pet's water bowl",1],["Set the table",2],["Put away groceries",2],["Sort clean clothes into piles",2]],
+  "6-12": [["Feed the pet",1],["Water the plants",1],["Set or clear the table",1],["Take out the rubbish",2],["Empty the dishwasher",2],["Wipe the kitchen benches",2],["Fold the washing",3],["Vacuum a room",3]]
+};
+var todayOverride = null;
+function today(){ var d = todayOverride ? new Date(todayOverride + "T12:00:00") : new Date(); d.setHours(12,0,0,0); return d; }
+function iso(d){ var m = d.getMonth()+1, dd = d.getDate(); return d.getFullYear() + "-" + (m<10?"0":"") + m + "-" + (dd<10?"0":"") + dd; }
+function weekStart(d){ var x = new Date(d.getTime()); x.setHours(12,0,0,0); var w = (x.getDay()+6)%7; x.setDate(x.getDate()-w); return x; }
+function weekKey(d){ return iso(weekStart(d)); }
+function dayIndex(d){ return (d.getDay()+6)%7; }
+function prevWeekKey(wk){ var d = new Date(wk + "T12:00:00"); d.setDate(d.getDate()-7); return iso(d); }
+var uid = function(){ return Math.random().toString(36).slice(2,9); };
+
+function makeKid(name, age, colour){
+  return { id: uid(), name: name, age: age, colour: colour, reward: age === "3-5" ? "Pick a bedtime story" : "Choose the Friday movie", goal: age === "3-5" ? 20 : 30,
+    jobs: STARTERS[age].map(function(j){ return { id: uid(), name: j[0], pts: j[1] }; }), ticks: {} };
+}
+function fresh(){ return { v: 1, kids: [makeKid("Big kid","6-12",0), makeKid("Little kid","3-5",1)], sel: 0, day: null }; }
+var S;
+function load(){ try { var raw = localStorage.getItem(KEY); S = raw ? JSON.parse(raw) : null; } catch(e){ S = null; }
+  if (!S || !S.kids || !S.kids.length) S = fresh(); if (S.sel >= S.kids.length) S.sel = 0; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+// Points: the sum of each ticked job's points for one week. A job deleted later still counts at the points it had when ticked.
+function total(kid, wk){ var t = kid.ticks[wk] || {}, n = 0; for (var k in t) n += t[k]; return n; }
+function prune(kid){ var keep = weekKey(today()), prev = prevWeekKey(keep); var ks = Object.keys(kid.ticks).sort();
+  ks.forEach(function(k){ if (k < prevWeekKey(prev) ) delete kid.ticks[k]; }); }
+function toggle(kid, jobId, day, wk){ wk = wk || weekKey(today()); var job = kid.jobs.filter(function(j){return j.id===jobId;})[0]; if (!job) return;
+  var t = kid.ticks[wk] = kid.ticks[wk] || {}; var k = jobId + "|" + day;
+  if (t[k] != null) delete t[k]; else t[k] = job.pts; return t[k] != null; }
+
+var $ = function(id){ return document.getElementById(id); };
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+var tt;
+function toast(msg){ var e = $("toast"); e.textContent = msg; e.classList.add("show"); clearTimeout(tt); tt = setTimeout(function(){ e.classList.remove("show"); }, 1800); }
+
+function render(){
+  var now = today(), wk = weekKey(now), td = dayIndex(now); if (S.day == null || S.day > td) S.day = td;
+  var kid = S.kids[S.sel], col = COLOURS[kid.colour % 4];
+  document.body.style.setProperty("--c", col[0]); document.body.style.setProperty("--cb", col[1]);
+  var ws = weekStart(now); $("wk").textContent = "Week of " + DAYS[0] + " " + ws.getDate() + " " + ws.toLocaleString("en-AU",{month:"short"});
+  $("kids").innerHTML = S.kids.map(function(k, i){ var c = COLOURS[k.colour % 4];
+    return '<button class="kid' + (i===S.sel?' on':'') + '" data-kid="' + i + '" style="--c:' + c[0] + ';--cb:' + c[1] + '"><span class="nm"><i class="dot"></i>' + esc(k.name) + '</span><span class="pt">' + total(k, wk) + ' pts</span></button>'; }).join("");
+  $("days").innerHTML = DAYS.map(function(d, i){ var dt = new Date(ws.getTime()); dt.setDate(dt.getDate()+i);
+    return '<button class="day' + (i===S.day?' on':'') + (i===td?' today':'') + (i>td?' future':'') + '" data-day="' + i + '"' + (i>td?' disabled':'') + '>' + d + '<b>' + dt.getDate() + '</b></button>'; }).join("");
+  var pts = total(kid, wk), goal = Math.max(1, +kid.goal || 1);
+  $("points").innerHTML = pts + ' <small>points this week</small>';
+  $("goal").textContent = (pts >= goal ? "Goal of " + goal + " reached: " : (goal - pts) + " to go for: ") + kid.reward;
+  $("bar").style.width = Math.min(100, pts / goal * 100) + "%";
+  $("won").className = "won" + (pts >= goal ? " show" : ""); $("won").textContent = "Reward earned: " + kid.reward;
+  var lw = total(kid, prevWeekKey(wk)); $("last").textContent = "Last week: " + lw + " points";
+  var t = kid.ticks[wk] || {};
+  $("jobshead").innerHTML = (S.day===td ? "Today's jobs" : DAYS[S.day] + "'s jobs") + ' <span>' + esc(kid.name) + '</span>';
+  $("jobs").innerHTML = kid.jobs.length ? kid.jobs.map(function(j){ var on = t[j.id + "|" + S.day] != null;
+    return '<button class="job' + (on?' done':'') + '" data-job="' + j.id + '"><span class="tk">' + (on ? '<svg width="18" height="18" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '') + '</span><span class="lb">' + esc(j.name) + '</span><span class="ps">+' + j.pts + '</span></button>'; }).join("")
+    : '<div class="empty">No jobs yet. Open "Set up this child" below to add some.</div>';
+  $("kname").value = kid.name; $("kage").value = kid.age; $("kreward").value = kid.reward; $("kgoal").value = kid.goal;
+  $("edjobs").innerHTML = kid.jobs.map(function(j){ return '<div class="ed"><span>' + esc(j.name) + ' (+' + j.pts + ')</span><button data-del="' + j.id + '">Remove</button></div>'; }).join("");
+  $("addkid").style.display = S.kids.length >= 4 ? "none" : ""; $("delkid").style.display = S.kids.length <= 1 ? "none" : "";
+}
+
+document.addEventListener("click", function(e){
+  var b = e.target.closest("button"); if (!b) return; var kid = S.kids[S.sel];
+  if (b.dataset.kid != null){ S.sel = +b.dataset.kid; }
+  else if (b.dataset.day != null){ S.day = +b.dataset.day; }
+  else if (b.dataset.job){ var wk = weekKey(today()), before = total(kid, wk);
+    var on = toggle(kid, b.dataset.job, S.day, wk); var after = total(kid, wk), goal = +kid.goal || 1;
+    if (on && before < goal && after >= goal) toast("Goal reached! " + kid.name + " earned: " + kid.reward); }
+  else if (b.dataset.del){ kid.jobs = kid.jobs.filter(function(j){ return j.id !== b.dataset.del; }); }
+  else if (b.id === "starter"){ kid.jobs = STARTERS[kid.age].map(function(j){ return { id: uid(), name: j[0], pts: j[1] }; }); toast("Starter jobs loaded"); }
+  else if (b.id === "addjob"){ var n = $("newjob").value.trim(); if (!n){ toast("Type a job name first"); return; }
+    kid.jobs.push({ id: uid(), name: n, pts: +$("newpts").value }); $("newjob").value = ""; toast("Job added"); }
+  else if (b.id === "addkid"){ if (S.kids.length >= 4) return; var used = S.kids.map(function(k){return k.colour;}), c = [0,1,2,3].filter(function(x){return used.indexOf(x)<0;})[0];
+    S.kids.push(makeKid("Child " + (S.kids.length+1), "6-12", c)); S.sel = S.kids.length-1; toast("Child added"); }
+  else if (b.id === "delkid"){ if (S.kids.length <= 1) return; if (!window.confirm("Remove " + kid.name + " and their points?")) return; S.kids.splice(S.sel,1); S.sel = 0; }
+  else return;
+  save(); render();
+});
+function bindField(id, key, num){ $(id).addEventListener("change", function(){ var v = this.value.trim(); var kid = S.kids[S.sel];
+  if (num){ v = Math.round(+v); if (!(v >= 1)) v = kid[key]; v = Math.min(500, v); } else if (!v && key !== "age") v = kid[key];
+  kid[key] = v; save(); render(); }); }
+bindField("kname","name"); bindField("kage","age"); bindField("kreward","reward"); bindField("kgoal","goal",true);
+
+load(); S.kids.forEach(prune); S.day = null; render(); save();
+
+// Small helper object for testing and for demos (no network, no Ai).
+window.ChoreChart = {
+  STARTERS: STARTERS, weekKey: weekKey, prevWeekKey: prevWeekKey,
+  state: function(){ return S; }, total: total,
+  setToday: function(d){ todayOverride = d; S.day = null; render(); },
+  render: function(){ render(); },
+  // Fill a sample week: Monday to the day before today, plus a last-week total.
+  example: function(){ S = fresh(); var now = today(), wk = weekKey(now), td = dayIndex(now), lw = prevWeekKey(wk);
+    var big = S.kids[0], lil = S.kids[1];
+    var plan = { 0:[[0,1,3],[0,3]], 1:[[0,2,4,6],[0,1,4]], 2:[[0,1,3,5],[0,2]], 3:[[0,2,7],[0,3,5]], 4:[[0,1],[0]], 5:[[0,6,7],[0,4]] };
+    for (var d = 0; d < td; d++){ var p = plan[d] || [[0],[0]];
+      p[0].forEach(function(j){ toggle(big, big.jobs[j].id, d, wk); }); p[1].forEach(function(j){ toggle(lil, lil.jobs[j].id, d, wk); }); }
+    [[0,1,3,5],[0,2,4],[0,1,6],[0,3,7],[0,2,5]].forEach(function(js, d){ js.forEach(function(j){ toggle(big, big.jobs[j].id, d, lw); }); });
+    [[0,3],[0,1,4],[0,2],[0,5]].forEach(function(js, d){ js.forEach(function(j){ toggle(lil, lil.jobs[j].id, d, lw); }); });
+    S.sel = 0; S.day = null; save(); render(); }
+};
+})();
+</script>
+</body>
+</html>
